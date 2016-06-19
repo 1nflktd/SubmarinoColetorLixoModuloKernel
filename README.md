@@ -12,3 +12,9 @@
 
 - sudo rmmod driver_so.ko
 - sudo rm /dev/so
+
+#### Testado com
+
+* gcc 5.3.1
+* fedora 23
+* sfml 2.3.2
