@@ -17,12 +17,11 @@ const int MAX_RETANGULOS = 10;
 const int X_JANELA = 500;
 const int Y_JANELA = 500;
 
-void criarRetangulo(const sf::CircleShape & circulo, std::vector<std::shared_ptr<sf::RectangleShape>> & vRetangulos)
+void criarRetangulo(const sf::RectangleShape & submarino, std::vector<std::shared_ptr<sf::RectangleShape>> & vRetangulos, const sf::Texture & texturaLixo)
 {
     if (vRetangulos.size() < MAX_RETANGULOS)
     {
         std::shared_ptr<sf::RectangleShape> ptr = std::make_shared<sf::RectangleShape>(sf::Vector2f(30.f, 30.f));
-        ptr->setFillColor(sf::Color::Green);
 
         std::random_device rd;
         std::mt19937 rng(rd());
@@ -35,8 +34,8 @@ void criarRetangulo(const sf::CircleShape & circulo, std::vector<std::shared_ptr
 
         sf::FloatRect boundingBox = ptr->getGlobalBounds();
 
-        // verifica se bate no circulo
-        if (boundingBox.intersects(circulo.getGlobalBounds()))
+        // verifica se bate no submarino
+        if (boundingBox.intersects(submarino.getGlobalBounds()))
             return;
 
         // verifica se bate em outro retangulo
@@ -47,14 +46,16 @@ void criarRetangulo(const sf::CircleShape & circulo, std::vector<std::shared_ptr
         if (it != vRetangulos.end())
             return;
 
+    	ptr->setTexture(&texturaLixo);
+
         // se nao adiciona
         vRetangulos.push_back(ptr);
     }
 }
 
-void verificarColisoes(const sf::CircleShape & circulo, std::vector<std::shared_ptr<sf::RectangleShape>> & vRetangulos)
+void verificarColisoes(const sf::RectangleShape & submarino, std::vector<std::shared_ptr<sf::RectangleShape>> & vRetangulos)
 {
-    sf::FloatRect boundingBox = circulo.getGlobalBounds();
+    sf::FloatRect boundingBox = submarino.getGlobalBounds();
 
     vRetangulos.erase(
         std::remove_if(vRetangulos.begin(), vRetangulos.end(), 
@@ -81,7 +82,7 @@ void processarEvento(sf::RenderWindow & window)
     }
 }
 
-void lerArquivo(sf::CircleShape & circulo)
+void lerArquivo(sf::RectangleShape & submarino)
 {
     int fp = open("/dev/so", O_RDWR);
     if (!(fp < 0))
@@ -92,24 +93,24 @@ void lerArquivo(sf::CircleShape & circulo)
 
         if (posicao != POSITION_STOP)
         {
-            sf::Vector2f posicao_circulo = circulo.getPosition();
-            sf::FloatRect tamanho_circulo = circulo.getGlobalBounds();
+            sf::Vector2f posicao_submarino = submarino.getPosition();
+            sf::FloatRect tamanho_submarino = submarino.getGlobalBounds();
 
-            if (posicao == POSITION_RIGHT && posicao_circulo.x + SPEED + tamanho_circulo.width <= X_JANELA)
+            if (posicao == POSITION_RIGHT && posicao_submarino.x + SPEED + tamanho_submarino.width <= X_JANELA)
             {
-                circulo.move(sf::Vector2f(SPEED, 0));
+                submarino.move(sf::Vector2f(SPEED, 0));
             }
-            else if (posicao == POSITION_LEFT && posicao_circulo.x - SPEED >= 0) 
+            else if (posicao == POSITION_LEFT && posicao_submarino.x - SPEED >= 0) 
             {
-                circulo.move(sf::Vector2f(-SPEED, 0));
+                submarino.move(sf::Vector2f(-SPEED, 0));
             }
-            else if (posicao == POSITION_UP && posicao_circulo.y - SPEED >= 0) 
+            else if (posicao == POSITION_UP && posicao_submarino.y - SPEED >= 0) 
             {
-                circulo.move(sf::Vector2f(0, -SPEED));
+                submarino.move(sf::Vector2f(0, -SPEED));
             }
-            else if (posicao == POSITION_DOWN && posicao_circulo.y + SPEED + tamanho_circulo.height <= Y_JANELA) 
+            else if (posicao == POSITION_DOWN && posicao_submarino.y + SPEED + tamanho_submarino.height <= Y_JANELA) 
             {
-                circulo.move(sf::Vector2f(0, SPEED));
+                submarino.move(sf::Vector2f(0, SPEED));
             }
             posicao = POSITION_STOP;
             ioctl(fp, IOCTL_SET_POSITION, std::to_string(posicao).c_str());
@@ -134,8 +135,20 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(X_JANELA, Y_JANELA), "Joguito Leitor!");
 
-    sf::CircleShape circulo(30.f);
-    circulo.setFillColor(sf::Color::Black);
+    sf::RectangleShape submarino(sf::Vector2f(50, 50));
+
+	sf::Texture texturaSubmarino;
+	if (!texturaSubmarino.loadFromFile("assets/submarino.png"))
+	{
+		std::cout << "Não conseguiu abrir textura do submarino\n";
+	    submarino.setFillColor(sf::Color::Black);
+	}
+	else
+		submarino.setTexture(&texturaSubmarino);
+
+	sf::Texture texturaLixo;
+	if (!texturaLixo.loadFromFile("assets/lixo.png"))
+		std::cout << "Não conseguiu abrir textura do lixo\n";
 
     std::vector<std::shared_ptr<sf::RectangleShape>> vRetangulos;
 
@@ -149,13 +162,13 @@ int main()
     {
         processarEvento(window);
         
-        proessarEventoRelogio(relogioRetangulos, delayRetangulos, criarRetangulo, circulo, vRetangulos);
-        proessarEventoRelogio(relogioMovimento, delayMovimento, lerArquivo, circulo);
-        proessarEventoRelogio(relogioColisoes, delayColisoes, verificarColisoes, circulo, vRetangulos);
+        proessarEventoRelogio(relogioRetangulos, delayRetangulos, criarRetangulo, submarino, vRetangulos, texturaLixo);
+        proessarEventoRelogio(relogioMovimento, delayMovimento, lerArquivo, submarino);
+        proessarEventoRelogio(relogioColisoes, delayColisoes, verificarColisoes, submarino, vRetangulos);
 
         window.clear(sf::Color::Blue);
         
-        window.draw(circulo);
+        window.draw(submarino);
 
         for_each(vRetangulos.begin(), vRetangulos.end(), [&window](auto ptr){
             window.draw(*ptr);
