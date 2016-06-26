@@ -133,7 +133,7 @@ void proessarEventoRelogio(Clock & relogio, const Time & delay, Function & funca
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(X_JANELA, Y_JANELA), "Joguito Leitor!");
+    sf::RenderWindow window(sf::VideoMode(X_JANELA, Y_JANELA), "Coletor de lixo. Leitor!");
 
     sf::RectangleShape submarino(sf::Vector2f(50, 50));
 
