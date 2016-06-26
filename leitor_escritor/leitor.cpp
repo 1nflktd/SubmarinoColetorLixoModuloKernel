@@ -143,8 +143,7 @@ int main()
 		std::cout << "Não conseguiu abrir textura do submarino\n";
 	    submarino.setFillColor(sf::Color::Black);
 	}
-	else
-		submarino.setTexture(&texturaSubmarino);
+	else submarino.setTexture(&texturaSubmarino);
 
 	sf::Texture texturaLixo;
 	if (!texturaLixo.loadFromFile("assets/lixo.png"))
@@ -156,7 +155,7 @@ int main()
 
     sf::Time delayRetangulos { sf::seconds(3) };
     sf::Time delayColisoes { sf::seconds(1) };
-    sf::Time delayMovimento { sf::seconds(0.1f) };
+    sf::Time delayMovimento { sf::seconds(0.3f) };
 
     while (window.isOpen())
     {
