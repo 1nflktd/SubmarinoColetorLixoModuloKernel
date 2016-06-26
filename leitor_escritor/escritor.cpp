@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <cassert>
+#include <memory>
 
 #include "../driver_so/driver_so.h"
 
@@ -45,55 +46,55 @@ int verificarTeclaPressionada()
 	return posicao;
 }
 
-std::map<int, sf::Texture> carregarTexturasPadrao()
+std::map<int, std::unique_ptr<sf::Texture>> carregarTexturasPadrao()
 {
-    std::map<int, sf::Texture> texturasPadrao;
-    texturasPadrao.emplace(POSITION_UP, sf::Texture{});
-    texturasPadrao.emplace(POSITION_DOWN, sf::Texture{});
-    texturasPadrao.emplace(POSITION_RIGHT, sf::Texture{});
-    texturasPadrao.emplace(POSITION_LEFT, sf::Texture{});
+    std::map<int, std::unique_ptr<sf::Texture>> texturasPadrao;
+    texturasPadrao.emplace(POSITION_UP, std::make_unique<sf::Texture>());
+    texturasPadrao.emplace(POSITION_DOWN, std::make_unique<sf::Texture>());
+    texturasPadrao.emplace(POSITION_RIGHT, std::make_unique<sf::Texture>());
+    texturasPadrao.emplace(POSITION_LEFT, std::make_unique<sf::Texture>());
 	
-	assert(texturasPadrao[POSITION_UP].loadFromFile("assets/tecla_para_cima.png"));
-	assert(texturasPadrao[POSITION_DOWN].loadFromFile("assets/tecla_para_baixo.png"));
-	assert(texturasPadrao[POSITION_RIGHT].loadFromFile("assets/tecla_para_direita.png"));
-	assert(texturasPadrao[POSITION_LEFT].loadFromFile("assets/tecla_para_esquerda.png"));
+	assert(texturasPadrao[POSITION_UP]->loadFromFile("assets/tecla_para_cima.png"));
+	assert(texturasPadrao[POSITION_DOWN]->loadFromFile("assets/tecla_para_baixo.png"));
+	assert(texturasPadrao[POSITION_RIGHT]->loadFromFile("assets/tecla_para_direita.png"));
+	assert(texturasPadrao[POSITION_LEFT]->loadFromFile("assets/tecla_para_esquerda.png"));
 
 	return texturasPadrao;
 }
 
-std::map<int, sf::Texture> carregarTexturasPressed()
+std::map<int, std::unique_ptr<sf::Texture>> carregarTexturasPressed()
 {
-    std::map<int, sf::Texture> texturasPressed;
-    texturasPressed.emplace(POSITION_UP, sf::Texture{});
-    texturasPressed.emplace(POSITION_DOWN, sf::Texture{});
-    texturasPressed.emplace(POSITION_RIGHT, sf::Texture{});
-    texturasPressed.emplace(POSITION_LEFT, sf::Texture{});
+    std::map<int, std::unique_ptr<sf::Texture>> texturasPressed;
+    texturasPressed.emplace(POSITION_UP, std::make_unique<sf::Texture>());
+    texturasPressed.emplace(POSITION_DOWN, std::make_unique<sf::Texture>());
+    texturasPressed.emplace(POSITION_RIGHT, std::make_unique<sf::Texture>());
+    texturasPressed.emplace(POSITION_LEFT, std::make_unique<sf::Texture>());
 	
-	assert(texturasPressed[POSITION_UP].loadFromFile("assets/tecla_para_cima_pressed.png"));
-	assert(texturasPressed[POSITION_DOWN].loadFromFile("assets/tecla_para_baixo_pressed.png"));
-	assert(texturasPressed[POSITION_RIGHT].loadFromFile("assets/tecla_para_direita_pressed.png"));
-	assert(texturasPressed[POSITION_LEFT].loadFromFile("assets/tecla_para_esquerda_pressed.png"));
+	assert(texturasPressed[POSITION_UP]->loadFromFile("assets/tecla_para_cima_pressed.png"));
+	assert(texturasPressed[POSITION_DOWN]->loadFromFile("assets/tecla_para_baixo_pressed.png"));
+	assert(texturasPressed[POSITION_RIGHT]->loadFromFile("assets/tecla_para_direita_pressed.png"));
+	assert(texturasPressed[POSITION_LEFT]->loadFromFile("assets/tecla_para_esquerda_pressed.png"));
 
 	return texturasPressed;	
 }
 
-std::map<int, sf::RectangleShape> carregarRetangulosTeclas(std::map<int, sf::Texture> & texturasPadrao)
+std::map<int, std::unique_ptr<sf::RectangleShape>> carregarRetangulosTeclas(std::map<int, std::unique_ptr<sf::Texture>> & texturasPadrao)
 {
-    std::map<int, sf::RectangleShape> teclas;
-    teclas.emplace(POSITION_UP, sf::RectangleShape{ sf::Vector2f(120, 120) });
-    teclas.emplace(POSITION_DOWN, sf::RectangleShape{ sf::Vector2f(120, 120) });
-    teclas.emplace(POSITION_RIGHT, sf::RectangleShape{ sf::Vector2f(120, 120) });
-    teclas.emplace(POSITION_LEFT, sf::RectangleShape{ sf::Vector2f(120, 120) });
+    std::map<int, std::unique_ptr<sf::RectangleShape>> teclas;
+    teclas.emplace(POSITION_UP, std::make_unique<sf::RectangleShape>(sf::Vector2f(120, 120)));
+    teclas.emplace(POSITION_DOWN, std::make_unique<sf::RectangleShape>(sf::Vector2f(120, 120)));
+    teclas.emplace(POSITION_RIGHT, std::make_unique<sf::RectangleShape>(sf::Vector2f(120, 120)));
+    teclas.emplace(POSITION_LEFT, std::make_unique<sf::RectangleShape>(sf::Vector2f(120, 120)));
 
-    teclas[POSITION_UP].setTexture(&texturasPadrao[POSITION_UP]);
-    teclas[POSITION_DOWN].setTexture(&texturasPadrao[POSITION_DOWN]);
-    teclas[POSITION_RIGHT].setTexture(&texturasPadrao[POSITION_RIGHT]);
-    teclas[POSITION_LEFT].setTexture(&texturasPadrao[POSITION_LEFT]);
+    teclas[POSITION_UP]->setTexture(texturasPadrao[POSITION_UP].get());
+    teclas[POSITION_DOWN]->setTexture(texturasPadrao[POSITION_DOWN].get());
+    teclas[POSITION_RIGHT]->setTexture(texturasPadrao[POSITION_RIGHT].get());
+    teclas[POSITION_LEFT]->setTexture(texturasPadrao[POSITION_LEFT].get());
 
-    teclas[POSITION_UP].setPosition(125, 5);
-    teclas[POSITION_DOWN].setPosition(125, 125);
-    teclas[POSITION_RIGHT].setPosition(245, 125);
-    teclas[POSITION_LEFT].setPosition(5, 125);
+    teclas[POSITION_UP]->setPosition(125, 5);
+    teclas[POSITION_DOWN]->setPosition(125, 125);
+    teclas[POSITION_RIGHT]->setPosition(245, 125);
+    teclas[POSITION_LEFT]->setPosition(5, 125);
 
 	return teclas;
 }
@@ -106,10 +107,10 @@ int main()
 	sf::Clock relogioMovimento;
     sf::Time delayMovimento { sf::seconds(0.3f) };
 
-    std::map<int, sf::Texture> texturasPadrao = carregarTexturasPadrao();
-    std::map<int, sf::Texture> texturasPressed = carregarTexturasPressed();
+    std::map<int, std::unique_ptr<sf::Texture>> texturasPadrao = carregarTexturasPadrao();
+    std::map<int, std::unique_ptr<sf::Texture>> texturasPressed = carregarTexturasPressed();
     
-    std::map<int, sf::RectangleShape> teclas = carregarRetangulosTeclas(texturasPadrao);
+    std::map<int, std::unique_ptr<sf::RectangleShape>> teclas = carregarRetangulosTeclas(texturasPadrao);
 
     int posicaoAtual = POSITION_STOP;
     int ultimaPosicao = POSITION_STOP;
@@ -141,20 +142,18 @@ int main()
 	    if (posicaoAtual != ultimaPosicao)
 	    {
 	    	if (ultimaPosicao != POSITION_STOP)
-		    	teclas[ultimaPosicao].setTexture(&texturasPadrao[ultimaPosicao]);
-
+		    	teclas[ultimaPosicao]->setTexture(texturasPadrao[ultimaPosicao].get());
+		    
 	    	if (posicaoAtual != POSITION_STOP)
-		    	teclas[posicaoAtual].setTexture(&texturasPressed[posicaoAtual]);
-	    	else
-		    	teclas[posicaoAtual].setTexture(&texturasPadrao[posicaoAtual]);
-
+		    	teclas[posicaoAtual]->setTexture(texturasPressed[posicaoAtual].get());
+			
 	    	ultimaPosicao = posicaoAtual;
 	    }
 
         window.clear(sf::Color::White);
 
-        for_each(teclas.begin(), teclas.end(), [&window](auto tecla){
-            window.draw(tecla.second);
+        for_each(teclas.begin(), teclas.end(), [&window](auto & tecla){
+            window.draw(*tecla.second);
         });
 
         window.display();

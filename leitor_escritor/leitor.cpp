@@ -9,6 +9,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <iostream>
+#include <cassert>
 
 #include "../driver_so/driver_so.h"
 
@@ -17,11 +18,11 @@ const int MAX_RETANGULOS = 10;
 const int X_JANELA = 500;
 const int Y_JANELA = 500;
 
-void criarRetangulo(const sf::RectangleShape & submarino, std::vector<std::shared_ptr<sf::RectangleShape>> & vRetangulos, const sf::Texture & texturaLixo)
+void criarRetangulo(const sf::RectangleShape & submarino, std::vector<std::unique_ptr<sf::RectangleShape>> & vRetangulos, std::unique_ptr<sf::Texture> & texturaLixo)
 {
     if (vRetangulos.size() < MAX_RETANGULOS)
     {
-        std::shared_ptr<sf::RectangleShape> ptr = std::make_shared<sf::RectangleShape>(sf::Vector2f(30.f, 30.f));
+        std::unique_ptr<sf::RectangleShape> ptr = std::make_unique<sf::RectangleShape>(sf::Vector2f(30.f, 30.f));
 
         std::random_device rd;
         std::mt19937 rng(rd());
@@ -39,27 +40,27 @@ void criarRetangulo(const sf::RectangleShape & submarino, std::vector<std::share
             return;
 
         // verifica se bate em outro retangulo
-        auto it = std::find_if(vRetangulos.begin(), vRetangulos.end(), [&boundingBox](auto ptr){
+        auto it = std::find_if(vRetangulos.begin(), vRetangulos.end(), [&boundingBox](auto & ptr){
             return boundingBox.intersects(ptr->getGlobalBounds());
         });
 
         if (it != vRetangulos.end())
             return;
 
-    	ptr->setTexture(&texturaLixo);
+    	ptr->setTexture(texturaLixo.get());
 
         // se nao adiciona
-        vRetangulos.push_back(ptr);
+        vRetangulos.push_back(std::move(ptr));
     }
 }
 
-void verificarColisoes(const sf::RectangleShape & submarino, std::vector<std::shared_ptr<sf::RectangleShape>> & vRetangulos)
+void verificarColisoes(const sf::RectangleShape & submarino, std::vector<std::unique_ptr<sf::RectangleShape>> & vRetangulos)
 {
     sf::FloatRect boundingBox = submarino.getGlobalBounds();
 
     vRetangulos.erase(
         std::remove_if(vRetangulos.begin(), vRetangulos.end(), 
-            [&boundingBox](auto ptr){          
+            [&boundingBox](auto & ptr){          
                 return boundingBox.intersects(ptr->getGlobalBounds());
             }
         ),vRetangulos.end()
@@ -138,18 +139,13 @@ int main()
     sf::RectangleShape submarino(sf::Vector2f(50, 50));
 
 	sf::Texture texturaSubmarino;
-	if (!texturaSubmarino.loadFromFile("assets/submarino.png"))
-	{
-		std::cout << "Não conseguiu abrir textura do submarino\n";
-	    submarino.setFillColor(sf::Color::Black);
-	}
-	else submarino.setTexture(&texturaSubmarino);
+    assert(texturaSubmarino.loadFromFile("assets/submarino.png"));
+    submarino.setTexture(&texturaSubmarino);
 
-	sf::Texture texturaLixo;
-	if (!texturaLixo.loadFromFile("assets/lixo.png"))
-		std::cout << "Não conseguiu abrir textura do lixo\n";
+	std::unique_ptr<sf::Texture> texturaLixo { std::make_unique<sf::Texture>() };
+	assert(texturaLixo->loadFromFile("assets/lixo.png"));
 
-    std::vector<std::shared_ptr<sf::RectangleShape>> vRetangulos;
+    std::vector<std::unique_ptr<sf::RectangleShape>> vRetangulos;
 
     sf::Clock relogioRetangulos, relogioColisoes, relogioMovimento;
 
@@ -169,7 +165,7 @@ int main()
         
         window.draw(submarino);
 
-        for_each(vRetangulos.begin(), vRetangulos.end(), [&window](auto ptr){
+        for_each(vRetangulos.begin(), vRetangulos.end(), [&window](auto & ptr){
             window.draw(*ptr);
         });
 
